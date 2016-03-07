@@ -3,7 +3,7 @@
 Plugin Name: Movie Data from RT
 Description: Display various movie data (Title, Year, Rating, Poster, Description etc.) from "Rotten Tomatoes". Flexible column design, tool-tips, short-codes & widget to display your movies professionally.
 Plugin URI: http://creativecreate.com/rtmd/
-Version: 0.9
+Version: 1.0.4
 Author: CreativeCreate LLC
 Author URI: http://creativecreate.com
 License: GPL2
@@ -29,7 +29,7 @@ $rtmdcc_errAPI				= null;									// api-key error check
 *	Set Admin Menu Links
 */
 function rtmdcc_menu(){
-	add_menu_page( 'Movie Data from RT', 'RT Movie Data', 'manage_options', 'rt-moviedata', 'rtmdcc_settings','','20.111');
+	add_menu_page( 'Movie Data from RT', 'RT Movie Data', 'manage_options', 'movie-data-from-rt', 'rtmdcc_settings','','20.111');
 }
 add_action( 'admin_menu', 'rtmdcc_menu' );
 
@@ -69,10 +69,12 @@ function rtmdcc_validate_apikey($validateValues){
 	return rtmdcc_getMovieData($validateValues);
 };
 // hi-res vs low-res poster image selection. Replace "resizing.flixster.com/...cloudfront.net" to "content6.flixster.com"
+// 03/07/2016 update after RT switches it's urls. Hi-res poster be created only if it available
+
 function rtmdcc_getPosterImg($imgurl, $hiResImg){	
 	if($hiResImg == 'Y'){											// if hi-res selected
 		$posterUrl	= explode('.net', $imgurl);						// get url text after "...cloudfront.net"
-		$imgurl		= 'http://content6.flixster.com'.$posterUrl[1];	// add hi-res domain
+		$imgurl		= ($posterUrl[1]) ?'http://content6.flixster.com'.$posterUrl[1]:$imgurl;	// add hi-res domain if available.	
 	}
 	return $imgurl;
 }
@@ -219,20 +221,20 @@ add_shortcode('rtmdcc_sc', 'rtmdcc_shortcode');
 */
 // front-end-styles
 function rtmdcc_styles(){
-	wp_enqueue_style( 'rtmdcc_styles', plugins_url( 'rt-moviedata/assets/rt-moviedata-styles.css' ));
-	wp_enqueue_script('rtmdcc_scripts', plugins_url('rt-moviedata/assets/rt-moviedata-scripts.js'), null, '0.9',true);
+	wp_enqueue_style( 'rtmdcc_styles', plugins_url( 'movie-data-from-rt/assets/rt-moviedata-styles.css' ));
+	wp_enqueue_script('rtmdcc_scripts', plugins_url('movie-data-from-rt/assets/rt-moviedata-scripts.js'), null, '0.9',true);
 }
 add_action('wp_enqueue_scripts', 'rtmdcc_styles');
 
 // back-end scripts and styles
 function rtmdcc_styles_Admin($suffix) {
-	if( strpos($suffix, 'rt-moviedata')){
+	if( strpos($suffix, 'movie-data-from-rt')){
 		// we use same css and js for front and back both.
-		wp_enqueue_style( 'rtmdcc_styles', plugins_url( 'rt-moviedata/assets/rt-moviedata-styles.css' ));
-		wp_enqueue_script('rtmdcc_scripts', plugins_url('rt-moviedata/assets/rt-moviedata-scripts.js'), null, '0.9',true);
+		wp_enqueue_style( 'rtmdcc_styles', plugins_url( 'movie-data-from-rt/assets/rt-moviedata-styles.css' ));
+		wp_enqueue_script('rtmdcc_scripts', plugins_url('movie-data-from-rt/assets/rt-moviedata-scripts.js'), null, '0.9',true);
         //Since WP admin UI postbox show-hide option is not default.
         wp_enqueue_script( 'postbox' );
-        wp_enqueue_script( 'postbox-edit', plugins_url('rt-moviedata/assets/rt-moviedata-scripts-admin.js'), array('jquery', 'postbox') );
+        wp_enqueue_script( 'postbox-edit', plugins_url('movie-data-from-rt/assets/rt-moviedata-scripts-admin.js'), array('jquery', 'postbox') );
     }
 }
 add_action( 'admin_enqueue_scripts', 'rtmdcc_styles_Admin' );
